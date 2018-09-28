@@ -54,36 +54,40 @@ def spectral(y):
 
     
 
-
-#%%
-L = 2500e3
-dx = 25e2
-u0 = 10.
-dt = 25.
-
-
-iters = int(250e3/dt)
-
-Larr = np.arange(0,L+dx,dx)
-
-C0 = np.zeros_like(Larr)
-C0[(Larr<=1375e3) & (Larr>=1125e3)] = 5.
-
-#C0 = np.sin(10*np.pi* Larr/L)
-
-Ceuler, Clax_wend, Cspectral = map(lambda a:np.array(a), [C0,C0,C0]) 
-
-for i in range(iters):
-    Ceuler = euler_upwind(Ceuler)
-    Clax_wend = lax_wend(Clax_wend)
-    Cspectral = spectral(Cspectral)
+if __name__ =="__main__":
     
+    # settings
+    L = 2500e3 # domain size in m
+    dx = 25e3  # grid spacing in m
+    u0 = 10.   # x-velocity in m/s
+    dt = 250.   # time step in s
     
-plt.close("all")
-plt.plot(Larr/1000.,C0, label="analytical solution")
-plt.plot(Larr/1000.,Ceuler, label="euler upwind")
-plt.plot(Larr/1000.,Clax_wend, label="lax wendroff")
-plt.plot(Larr/1000.,Cspectral, label="spectral")
-plt.xlabel("L [km]")
-plt.ylabel("C")
-plt.legend()
+    # distance array in x-direction
+    Larr = np.arange(0,L+dx,dx)
+    
+    # concentration of a tracer
+    C0 = np.zeros_like(Larr)
+    C0[(Larr<=1375e3) & (Larr>=1125e3)] = 5.
+    
+    # iterations until disturbance arrives at inital point in analytical solution 
+    iters = int(L/u0/dt)
+    
+    # allocate arrays for diffent methods
+    Ceuler, Clax_wend, Cspectral = map(lambda a:np.array(a), [C0,C0,C0]) 
+    
+    # integration
+    for i in range(iters):
+        Ceuler = euler_upwind(Ceuler)
+        Clax_wend = lax_wend(Clax_wend)
+        Cspectral = spectral(Cspectral)
+        
+    
+    # plot results
+    plt.close("all")
+    plt.plot(Larr/1000.,C0, label="analytical solution")
+    plt.plot(Larr/1000.,Ceuler, label="euler upwind")
+    plt.plot(Larr/1000.,Clax_wend, label="lax wendroff")
+    plt.plot(Larr/1000.,Cspectral, label="spectral")
+    plt.xlabel("L [km]")
+    plt.ylabel("C")
+    plt.legend()
